@@ -1,15 +1,8 @@
 {
     "name": "mohdishrat/autodeployment",
-<<<<<<< HEAD
-    "description": "AutoDeployment via ansible and laravel process.",
-    "autoload": {
-        "psr-4": {
-            "Mohdishrat\\Autodeployment\\": "src/app/"
-=======
     "autoload": {
         "psr-4": {
             "Mohdishrat\\Autodeployment\\": "src/"
->>>>>>> 6b65055 (Initial commit)
         }
     },
     "authors": [
