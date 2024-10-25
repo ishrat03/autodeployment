@@ -7,6 +7,6 @@ class AutoDeploymentController extends Controller
 {
     public function index()
     {
-        echo "from index function";
+        return view('autodeployemnt::index');
     }
 }

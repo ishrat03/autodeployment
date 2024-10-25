@@ -11,5 +11,7 @@
             "email": "mohd.ishrat@biz4solutions.com"
         }
     ],
-    "require": {}
+    "require": {
+        "laravel/ui": "^4.5"
+    }
 }
