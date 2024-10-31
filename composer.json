@@ -12,6 +12,11 @@
         }
     ],
     "require": {
-        "laravel/ui": "^4.5"
+        
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "Mohdishrat\\Autodeployment\\ComposerScripts::createPlaybooksDirectory"
+        ]
     }
 }

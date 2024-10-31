@@ -11,14 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('auto_deployment', function (Blueprint $table)
+        Schema::create('auto_deployments', function (Blueprint $table)
         {
             $table->id();
-            $table->string("name")->comment("Webhook Type (Deployment Name)");
+            $table->string("name")->nullable(true)->comment("Webhook Type (Deployment Name)");
             $table->json("webhook_payload")->comment("Post Payload recieved from webhook");
             $table->string("status")->comment("pending, processing, failed, success");
-            $table->longText("process_output")->comment("output of ansible");
-            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp("webhook_time")->comment("Time when webhook recieved");
+            $table->timestamp("deployment_start_time")->nullable(true)->comment("Time when deployment started");
+            $table->timestamp("deployment_end_time")->nullable(true)->comment("Time when deployment ended");
+            $table->longText("process_output")->nullable(true)->comment("output of ansible");
+            $table->json('json_output')->nullable(true)->comment("output of ansible playbook");
+            $table->timestamp('created_at')->nullable(true)->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->useCurrent();
         });
     }
@@ -28,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('auto_deployment');
+        Schema::dropIfExists('auto_deployments');
     }
 };
