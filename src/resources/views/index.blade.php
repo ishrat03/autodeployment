@@ -188,8 +188,12 @@
                         }
                     }
                     else {
-                        $('tbody').append(createNoDeploymentAndLoadingRow("No Deployment Found"));
+                        $('tbody').html(createNoDeploymentAndLoadingRow("No Deployment Found"));
                     }
+                }
+                else
+                {
+                    $('tbody').html(createNoDeploymentAndLoadingRow("No Deployment Found"));
                 }
             },
             error: () =>

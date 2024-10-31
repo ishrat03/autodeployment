@@ -1,12 +1,9 @@
 <?php
 
 namespace Mohdishrat\Autodeployment;
-
-use Composer\Script\Event;
-
 class ComposerScripts
 {
-    public static function createPlaybooksDirectory(Event $event)
+    public static function createPlaybooksDirectory()
     {
         $projectRoot = getcwd();
         $playbooksDir = $projectRoot . '/playbooks';
