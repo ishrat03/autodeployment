@@ -14,6 +14,9 @@
     "scripts": {
         "post-autoload-dump": [
             "Mohdishrat\\Autodeployment\\ComposerScripts::createPlaybooksDirectory"
+        ],
+        "post-install-cmd": [
+            "Mohdishrat\\Autodeployment\\ComposerScripts::createPlaybooksDirectory"
         ]
     }
 }
