@@ -6,6 +6,10 @@ class ComposerScripts
     public static function createPlaybooksDirectory()
     {
         $projectRoot = getcwd();
+        echo '<pre>';print_r($projectRoot);echo ' proje$projectRoot</pre>';
+        $logfile = '/tmp/composer_script.log'; // Adjust path if needed
+        file_put_contents($logfile, "Executing createPlaybooksDirectory\n", FILE_APPEND);
+
         $playbooksDir = $projectRoot . '/playbooks';
 
         if (!is_dir($playbooksDir))

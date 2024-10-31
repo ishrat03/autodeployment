@@ -11,9 +11,6 @@
             "email": "mohd.ishrat@biz4solutions.com"
         }
     ],
-    "require": {
-        
-    },
     "scripts": {
         "post-autoload-dump": [
             "Mohdishrat\\Autodeployment\\ComposerScripts::createPlaybooksDirectory"
