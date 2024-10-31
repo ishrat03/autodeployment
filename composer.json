@@ -11,12 +11,10 @@
             "email": "mohd.ishrat@biz4solutions.com"
         }
     ],
-    "scripts": {
-        "post-autoload-dump": [
-            "Mohdishrat\\Autodeployment\\ComposerScripts::createPlaybooksDirectory"
-        ],
-        "post-install-cmd": [
-            "Mohdishrat\\Autodeployment\\ComposerScripts::createPlaybooksDirectory"
-        ]
+    "require": {
+        "composer-plugin-api": "^2.0 || ^3.0"
+    },
+    "extra": {
+        "class": "Mohdishrat\\Autodeployment\\AutoDeploymentPlugin"
     }
 }
