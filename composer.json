@@ -10,11 +10,5 @@
             "name": "Mohd Ishrat",
             "email": "mohd.ishrat@biz4solutions.com"
         }
-    ],
-    "require": {
-        "composer-plugin-api": "^2.0 || ^3.0"
-    },
-    "extra": {
-        "class": "Mohdishrat\\Autodeployment\\AutoDeploymentPlugin"
-    }
+    ]
 }

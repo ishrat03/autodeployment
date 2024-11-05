@@ -51,11 +51,10 @@
 <!-- Modal -->
 <div id="myModal"
     class="fixed inset-0 z-50 hidden bg-gray-800 bg-opacity-50 pl-5 pr-5 flex items-center justify-center modal-backdrop">
-    <div class="bg-white rounded-lg shadow-lg w-full p-5 modal">
-        <h2 class="text-lg font-semibold mb-4 text-center text-gray-500">Deployment Status</h2>
+    <div class="bg-white rounded-lg shadow-lg p-5 max-h-[80vh] overflow-y-auto modal">
+        <h2 class="text-lg font-bold mb-4 text-center text-gray-500">Deployment Status</h2>
         <hr />
-        <div id="resultBox">
-
+        <div id="resultBox" class="p-2">
         </div>
         <div class="flex justify-center space-x-4">
             <button id="closeModal" class="bg-red-500 text-white font-bold py-2 px-4 rounded">
@@ -64,6 +63,7 @@
         </div>
     </div>
 </div>
+
 <script>
     const createTableRow = (value) => {
         const row = $(`
@@ -105,6 +105,8 @@
                                                     <i class="fa-solid fa-rotate-right"></i>
                                                 </button>`
                             }
+
+                            <button onclick="viewDeployments(${value.id})" class="px-4 py-1 bg-green-500 text-white font-semibold hover:bg-green-600 focus:outline-none hover:scale-105"><i class="fa-solid fa-eye"></i></button>
                             <a href="/" class="px-4 py-1 bg-red-500 text-white font-semibold rounded-r-lg hover:bg-red-700 focus:outline-none hover:scale-105">
                                 <i class="fa-solid fa-trash-can"></i>
                             </a>`}
@@ -133,24 +135,29 @@
         loadDeployments();
         // Close modal
         $('#closeModal').on('click', function () {
-            $('.modal').removeClass('show'); // Hide the modal content
+            $('.modal').removeClass('show');
             setTimeout(() => {
-                $('.modal-backdrop').removeClass('show'); // Fade out the backdrop
-            }, 500); // Match with modal animation duration
+                $('.modal-backdrop').removeClass('show');
+                $('#closeModal').focus();
+            }, 500);
             setTimeout(() => {
-                $('#myModal').addClass('hidden'); // Hide the modal backdrop after animation
-            }, 510); // Slightly longer to ensure the modal is hidden after fade-out
+                $('#myModal').addClass('hidden');
+                $('#closeModal').focus();
+            }, 510);
         });
 
         // Close modal when clicking outside of the modal content
         $(window).on('click', function (event) {
             if ($(event.target).is('#myModal')) {
                 $('.modal').removeClass('show'); // Hide the modal content
+                $('#closeModal').focus();
                 setTimeout(() => {
                     $('.modal-backdrop').removeClass('show'); // Fade out the backdrop
+                    $('#closeModal').focus();
                 }, 500); // Match with modal animation duration
                 setTimeout(() => {
                     $('#myModal').addClass('hidden'); // Hide the modal backdrop after animation
+                    $('#closeModal').focus();
                 }, 510); // Slightly longer to ensure the modal is hidden after fade-out
             }
         });
@@ -240,10 +247,16 @@
             {
                 Swal.fire({
                     title: `${result.value.header.msg}`,
-                    icon:result.value.header.status
+                    icon:result.value.header.status,
+                    timer: 3000,
+                    timerProgressBar: true,
                 });
                 loadDeployments();
                 setIntervalToReloadData();
+                setTimeout(() =>
+                {
+                    viewDeployments(id);
+                }, 3000);
             }
         });
     }
@@ -266,10 +279,53 @@
         }, 10);
     }
 
+    var deploymentinterval = "";
+
     function viewDeployments(id)
     {
         openModal();
         $("#resultBox").html("processing results");
+        $.ajax(
+        {
+            url: `/deploymentstatus/${id}`,
+            method: "GET",
+            success: (response) =>
+            {
+                if (response.header.code === 200)
+                {
+                    if (response.body.data != undefined)
+                    {
+                        $("#resultBox").html(response.body.data);
+                        $('#closeModal').focus();
+
+                        if(response.body.processing == true && deploymentinterval == "")
+                        {
+                            deploymentinterval = setInterval(() =>
+                            {
+                                viewDeployments(id);
+                            }, 5000);
+                        }
+
+                        if(response.body.processing == false && deploymentinterval != "")
+                        {
+                            clearInterval(deploymentinterval);
+                        }
+                    }
+                    else
+                    {
+                        $("#resultBox").html("No Deployment Status Found");
+                    }
+                }
+                else
+                {
+                    $("#resultBox").html("No Deployment Status Found");
+                }
+            },
+            error: () =>
+            {
+                $("#danger").html("Something went wrong");
+            }
+        });
     }
 </script>
 @endsection

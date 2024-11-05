@@ -8,6 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Mohdishrat\Autodeployment\Libraries\AutoDeploymentLib;
 use Mohdishrat\Autodeployment\Libraries\Constants;
 use Mohdishrat\Autodeployment\Models\AutoDeployment;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -57,7 +58,7 @@ class AutoDeploymentJob implements ShouldQueue
 
         if($this->branch == "")
         {
-            $playbookPath = base_path('playbooks/playbook.yml');
+            $playbookPath = base_path('playbooks/laraveldeployment.yml');
         }
         else
         {
@@ -71,11 +72,10 @@ class AutoDeploymentJob implements ShouldQueue
             'HOME' => base_path(),
         ];
 
-        $params = "-e project_path='{$envVars['HOME']}' -e branch='{$branch}' -e env_pointing='{$envPointing}'";
+        $params = "-e project_path='{$envVars['HOME']}' -e branch='{$branch}' -e env_pointing='{$envPointing}' -e insert_id='{$this->insertId}'";
 
         Log::info("@Deployment sending calls for playbook", [$playbookPath, $params]);
-        // $process = new Process(['ansible-playbook', $playbookPath, $params]);
-        $process = new Process(['ls', '-la', '-lh']);
+        $process = new Process(['ansible-playbook', $playbookPath, $params]);
         
         // Set environment variables for the process
         $process->setEnv($envVars)->setTimeout(0);
@@ -94,7 +94,8 @@ class AutoDeploymentJob implements ShouldQueue
                 Log::info("@Deployment Sonar Scam Completed for branch {$this->branch}");
             }
 
-            sleep(15);
+            $finalJsonOutput = AutoDeploymentLib::fetchJsonOutput($this->insertId);
+            info("deployment final", $finalJsonOutput);
             AutoDeployment::where("id", $this->insertId)
                 ->update(
                     [
@@ -102,7 +103,7 @@ class AutoDeploymentJob implements ShouldQueue
                         "status" => 'completed',
                         "updated_at" => date(Constants::CURRENTDATETIME),
                         "deployment_end_time" => date(Constants::CURRENTDATETIME),
-                        "json_output" => "{}"
+                        "json_output" => json_encode($finalJsonOutput, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
                     ]
                 );
         }

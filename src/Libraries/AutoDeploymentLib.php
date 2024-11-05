@@ -123,4 +123,40 @@ class AutoDeploymentLib
             return false;
         }
     }
+
+    public static function fetchJsonOutput($processId)
+    {
+        $fileName = public_path("deployment/deployment_log_{$processId}.json");
+
+        if(!file_exists($fileName))
+        {
+            return [
+                "code" => 201,
+                "msg" => "File Not Exists"
+            ];
+        }
+
+        $records = file_get_contents($fileName);
+        $records = json_decode($records, true);
+
+        if(!is_array($records))
+        {
+            return [
+                "code" => 201,
+                "msg" => "Invalid Json File"
+            ];
+        }
+
+        $result = [];
+        foreach ($records as $key => $value)
+        {
+            $result[array_key_first($value)] = reset($value);
+        }
+
+        $replacePattern = "/\\x1B\\[[0-9;]*[a-zA-Z]/";
+        $result["composer_install"]["stdout"] = preg_replace($replacePattern, "", $result["composer_install"]["stdout"]);
+
+        // unlink($fileName);
+        return $result;
+    }
 }

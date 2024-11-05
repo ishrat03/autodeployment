@@ -10,8 +10,14 @@ Route::controller(AutoDeploymentController::class)->group(function()
     Route::post('cicdwebhook', 'cicdWebhook');
     Route::get("startdeployment/{id}", 'startDeployment');
     Route::get("deploymentdata", 'deploymentData');
+    Route::get("deploymentstatus/{id}", "deploymentStatus");
     Route::get("hashpassword", function()
     {
         echo Hash::make("thisisrandomstring");
+    });
+
+    Route::get("testfunc", function()
+    {
+        return Mohdishrat\Autodeployment\Libraries\AutoDeploymentLib::fetchJsonOutput(18);
     });
 });

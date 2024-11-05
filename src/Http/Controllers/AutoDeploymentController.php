@@ -161,4 +161,73 @@ class AutoDeploymentController extends Controller
             ]
         );
     }
+
+    public function deploymentStatus($id)
+    {
+        $status = AutoDeployment::select("status", "json_output")
+            ->where("id", $id)
+            ->first();
+
+        if($status == null)
+        {
+            return response(
+                [
+                    "header" => [
+                        "code" => 201,
+                        "status" => "error",
+                        "msg" => "Invalid deployment ID"
+                    ]
+                ]
+            );
+        }
+
+        $processing = false;
+        if($status->status == "processing")
+        {
+            $processing = true;
+            $result = AutoDeploymentLib::fetchJsonOutput($id);
+        }
+        else
+        {
+            $result = $status->json_output;
+            $result = json_decode($result, true);
+        }
+
+        $steps = [
+            "insert_id",
+            "git_pull",
+            "remove_composer_lock",
+            "composer_install",
+            "optimize_clear",
+            "restart_queue",
+            "log_permission",
+            "session_permission"
+        ];
+
+        $finalResult = [];
+
+        foreach ($steps as $step)
+        {
+            if(isset($result[$step]))
+            {
+                $finalResult[$step] = $result[$step];
+            }
+        }
+
+        $result = View('autodeployment::deploymentstatus', ['result' => $finalResult])->render();
+
+        return response(
+            [
+                "header" => [
+                    "code" => 200,
+                    "status" => "success",
+                    "msg" => "Ok"
+                ],
+                "body" => [
+                    "processing" => $processing,
+                    "data" => $result
+                ]
+            ]
+        );
+    }
 }
