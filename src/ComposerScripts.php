@@ -27,6 +27,7 @@ class ComposerScripts
 
         file_put_contents("$playbooksDir/log_task.yml", $logContent);
 
+        $a = '\\\\1';
         $ymlContent = <<<YML
         # laraveldeployment.yml
         ---
@@ -35,7 +36,8 @@ class ComposerScripts
             vars:
                 env_file_path: "{{ project_path }}/.env"
                 json_log_file: "{{ project_path }}/public/deployment/deployment_log_{{insert_id}}.json"
-                initial_stage: '[{"insert_id": {{insert_id}} },{"composer_install": "pending"},{"optimize_clear":"pending"}, {"restart_queue": "pending"}, {"log_permission": "pending"}]'
+                initial_stage: '[{"deployment_id": {{insert_id}} },{"composer_install": "pending"},{"optimize_clear":"pending"}, {"restart_queue": "pending"}, {"log_permission": "pending"}]'
+                ssh_key_path: "{{ (lookup('file', env_file_path) | regex_search('^SSH_KEY_PATH=(.*)$', '$a', multiline=True))[0].strip() | replace('\"', '') }}"
   
             tasks:
                 -   name: Ensure Log Directory exists
@@ -53,12 +55,42 @@ class ComposerScripts
                         dest: "{{ json_log_file }}"
                         content: "{{ deployment_log | to_nice_json }}"
 
+                -   name: Add Project Directory to safe Directory
+                    command: "git config --global --add safe.directory {{project_path}}"
+                    args:
+                        chdir: "{{project_path}}"
+                    ignore_errors: yes
+
+                -   name: Pull New Changes
+                    command: "git pull origin {{branch}}"
+                    args:
+                        chdir: "{{project_path}}"
+                    environment:
+                        GIT_SSH_COMMAND: "ssh -i {{ssh_key_path}} -o StrictHostKeyChecking=no"
+                    register: git_pull
+                    ignore_errors: yes
+
+                -   name: Git Pull Output
+                    debug:
+                        msg: "{{git_pull.stdout or git_pull.stderr or 'NO OUTPUT'}}"
+                    ignore_errors: yes
+                    when:
+                        - git_pull is succeeded
+
+                -   name: Log Optimize Clear
+                    include_tasks: log_task.yml
+                    vars:
+                        log_key: 'git_pull'
+                        log_value: "{{ git_pull }}"
+
                 -   name: Remove Composer Lock
                     command: rm composer.lock
                     args:
                         chdir: "{{project_path}}"
                     register: remove_composer_lock
                     ignore_errors: yes
+                    when:
+                        - git_pull is succeeded
 
                 -   name: Log Optimize Clear
                     include_tasks: log_task.yml
@@ -72,6 +104,8 @@ class ComposerScripts
                         chdir: "{{project_path}}"
                     register: composer_install
                     ignore_errors: yes
+                    when:
+                        - git_pull is succeeded
 
                 -   name: Log Composer Install
                     include_tasks: log_task.yml
@@ -86,6 +120,7 @@ class ComposerScripts
                     register: optimize_clear
                     ignore_errors: yes
                     when:
+                        - git_pull is succeeded
                         - composer_install is succeeded
 
                 -   name: Log Optimize Clear
@@ -101,6 +136,7 @@ class ComposerScripts
                     register: restart_queue
                     ignore_errors: yes
                     when:
+                        - git_pull is succeeded
                         - composer_install is succeeded
                         - optimize_clear is succeeded
 
@@ -117,6 +153,7 @@ class ComposerScripts
                     register: log_permission
                     ignore_errors: yes
                     when:
+                        - git_pull is succeeded
                         - composer_install is succeeded
                         - optimize_clear is succeeded
                         - restart_queue is succeeded

@@ -94,7 +94,7 @@ class AutoDeploymentJob implements ShouldQueue
                 Log::info("@Deployment Sonar Scam Completed for branch {$this->branch}");
             }
 
-            $finalJsonOutput = AutoDeploymentLib::fetchJsonOutput($this->insertId);
+            $finalJsonOutput = AutoDeploymentLib::fetchJsonOutput($this->insertId, true);
             info("deployment final", $finalJsonOutput);
             AutoDeployment::where("id", $this->insertId)
                 ->update(

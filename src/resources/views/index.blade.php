@@ -51,12 +51,13 @@
 <!-- Modal -->
 <div id="myModal"
     class="fixed inset-0 z-50 hidden bg-gray-800 bg-opacity-50 pl-5 pr-5 flex items-center justify-center modal-backdrop">
-    <div class="bg-white rounded-lg shadow-lg p-5 max-h-[80vh] overflow-y-auto modal">
+    <div class="bg-white rounded-lg shadow-lg p-5 max-h-[95vh] overflow-y-auto modal">
         <h2 class="text-lg font-bold mb-4 text-center text-gray-500">Deployment Status</h2>
-        <hr />
+        <hr class="w-full border-0 h-[2px] bg-purple-500">
         <div id="resultBox" class="p-2">
         </div>
-        <div class="flex justify-center space-x-4">
+        <hr class="w-full border-0 h-[2px] bg-purple-500">
+        <div class="flex justify-center space-x-4 pt-2">
             <button id="closeModal" class="bg-red-500 text-white font-bold py-2 px-4 rounded">
                 Close
             </button>
@@ -97,7 +98,7 @@
                     </td>
                     <td class="p-2 border-b border-slate-200 py-2 text-center">
                         <div class="flex justify-center space-x-0">
-                            ${value.status === "Processing" ? `<button onclick="viewDeployments(${value.id})" class="px-4 py-1 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 focus:outline-none hover:scale-105"><i class="fa-solid fa-eye"></i></button>`: `${value.status === 'Pending'
+                            ${value.status === "Processing" ? `<button onclick="openModalAndViewDeployments(${value.id})" class="px-4 py-1 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 focus:outline-none hover:scale-105"><i class="fa-solid fa-eye"></i></button>`: `${value.status === 'Pending'
                                 ? `<button onclick="(reloadAndStartDeployment(${value.id}))" class="px-4 py-1 bg-green-500 text-white font-semibold rounded-l-lg hover:bg-green-600 focus:outline-none hover:scale-105">
                                                     <i class="fa-solid fa-play"></i>
                                                 </button>`
@@ -106,7 +107,7 @@
                                                 </button>`
                             }
 
-                            <button onclick="viewDeployments(${value.id})" class="px-4 py-1 bg-green-500 text-white font-semibold hover:bg-green-600 focus:outline-none hover:scale-105"><i class="fa-solid fa-eye"></i></button>
+                            <button onclick="openModalAndViewDeployments(${value.id})" class="px-4 py-1 bg-gray-500 text-white font-semibold hover:bg-gray-600 focus:outline-none hover:scale-105"><i class="fa-solid fa-eye"></i></button>
                             <a href="/" class="px-4 py-1 bg-red-500 text-white font-semibold rounded-r-lg hover:bg-red-700 focus:outline-none hover:scale-105">
                                 <i class="fa-solid fa-trash-can"></i>
                             </a>`}
@@ -255,6 +256,7 @@
                 setIntervalToReloadData();
                 setTimeout(() =>
                 {
+                    openModal();
                     viewDeployments(id);
                 }, 3000);
             }
@@ -281,10 +283,19 @@
 
     var deploymentinterval = "";
 
-    function viewDeployments(id)
+    function openModalAndViewDeployments(id)
     {
         openModal();
-        $("#resultBox").html("processing results");
+        viewDeployments(id);
+    }
+
+    function viewDeployments(id)
+    {
+        if(deploymentinterval == "")
+        {
+            $("#resultBox").html("processing results");
+        }
+
         $.ajax(
         {
             url: `/deploymentstatus/${id}`,

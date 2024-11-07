@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AutoDeploymentLib
 {
-    public static function handleMerged($result, $pointing, $insertId)
+    public static function handleMerged($result, $pointing, $insertId, $startDeployment)
     {
         try
         {
@@ -17,7 +17,7 @@ class AutoDeploymentLib
             $destinationBranch = $result["destination"]["branch"]["name"];
             if(in_array($destinationBranch, [$prodBranch, $stageBranch]))
             {
-                if(($pointing == Constants::PRODPOINTING && $destinationBranch == $prodBranch) || ($pointing == Constants::DEVPOINTING && $destinationBranch == $stageBranch))
+                if(($pointing == Constants::PRODPOINTING && $destinationBranch == $prodBranch) || ($pointing == Constants::DEVPOINTING && $destinationBranch == $stageBranch) && $startDeployment)
                 {
                     info("@Deployment Starting Deployent Process for branch {$result["destination"]["branch"]["name"]}");
                     AutoDeploymentJob::dispatch($insertId, "pr_merged", "")->onQueue("cicd");
@@ -56,7 +56,7 @@ class AutoDeploymentLib
         }
     }
 
-    public static function handleDeployment($result, $insertId)
+    public static function handleDeployment($result, $insertId, $startDeployment)
     {
         try
         {
@@ -64,7 +64,7 @@ class AutoDeploymentLib
             switch($result["state"])
             {
                 case "MERGED":
-                    self::handleMerged($result, $pointing, $insertId);
+                    self::handleMerged($result, $pointing, $insertId, $startDeployment);
                     break;
                 case "OPEN":
                     self::handleOpenState($result, $pointing, $insertId);
@@ -124,7 +124,7 @@ class AutoDeploymentLib
         }
     }
 
-    public static function fetchJsonOutput($processId)
+    public static function fetchJsonOutput($processId, $unlinkFile)
     {
         $fileName = public_path("deployment/deployment_log_{$processId}.json");
 
@@ -153,10 +153,34 @@ class AutoDeploymentLib
             $result[array_key_first($value)] = reset($value);
         }
 
-        $replacePattern = "/\\x1B\\[[0-9;]*[a-zA-Z]/";
-        $result["composer_install"]["stdout"] = preg_replace($replacePattern, "", $result["composer_install"]["stdout"]);
+        if(isset($result["composer_install"]) && is_array($result["composer_install"]))
+        {
+            if((isset($result["composer_install"]["skipped"]) && $result["composer_install"]["skipped"] == false) || isset($result["composer_install"]["failed"]))
+            {
+                $replacePattern = "/\\x1B\\[[0-9;]*[a-zA-Z]/";
+                $result["composer_install"]["stdout"] = preg_replace($replacePattern, "", $result["composer_install"]["stdout"]);
+            }
+        }
 
-        // unlink($fileName);
+        if($unlinkFile)
+        {
+            unlink($fileName);
+        }
         return $result;
+    }
+
+    public static function checkForStartDeployment()
+    {
+        $pointing = env("APP_ENV");
+        if($pointing == Constants::DEVPOINTING)
+        {
+            return config('autodeploymentconfig.dev_auto_deploy');
+        }
+        elseif ($pointing == Constants::PRODPOINTING)
+        {
+            return config('autodeploymentconfig.prod_auto_deploy');
+        }
+
+        return false;
     }
 }

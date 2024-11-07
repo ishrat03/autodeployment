@@ -45,14 +45,14 @@ class AutoDeploymentController extends Controller
                 $obj->created_at = date(Constants::CURRENTDATETIME);
                 $obj->updated_at = date(Constants::CURRENTDATETIME);
                 $obj->webhook_time = date(Constants::CURRENTDATETIME);
-                $obj->name = "code push";
+                $obj->name = "pr_merged";
                 $obj->status = "pending";
                 $obj->process_output = "";
                 $obj->save();
                 $insertId = $obj->id;
                 unset($obj);
                 $result = $result["pullrequest"];
-                AutoDeploymentLib::handleDeployment($result, $insertId);
+                AutoDeploymentLib::handleDeployment($result, $insertId, AutoDeploymentLib::checkForStartDeployment());
             }
             else
             {
@@ -127,7 +127,7 @@ class AutoDeploymentController extends Controller
             $data = json_decode($data->webhook_payload, true);
             $data = $data["pullrequest"];
 
-            AutoDeploymentLib::handleDeployment($data, $id);
+            AutoDeploymentLib::handleDeployment($data, $id, true);
             
             return response(
                 [
@@ -185,7 +185,7 @@ class AutoDeploymentController extends Controller
         if($status->status == "processing")
         {
             $processing = true;
-            $result = AutoDeploymentLib::fetchJsonOutput($id);
+            $result = AutoDeploymentLib::fetchJsonOutput($id, false);
         }
         else
         {
@@ -194,7 +194,7 @@ class AutoDeploymentController extends Controller
         }
 
         $steps = [
-            "insert_id",
+            "deployment_id",
             "git_pull",
             "remove_composer_lock",
             "composer_install",
