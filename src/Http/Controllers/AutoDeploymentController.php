@@ -17,6 +17,7 @@ class AutoDeploymentController extends Controller
         return view('autodeployment::index', [
             "data" => [],
             'headers' => [
+                "Sr.No",
                 "Deployment ID",
                 "Deployment Name",
                 "Status",

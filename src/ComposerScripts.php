@@ -36,7 +36,7 @@ class ComposerScripts
             vars:
                 env_file_path: "{{ project_path }}/.env"
                 json_log_file: "{{ project_path }}/public/deployment/deployment_log_{{insert_id}}.json"
-                initial_stage: '[{"deployment_id": {{insert_id}} },{"composer_install": "pending"},{"optimize_clear":"pending"}, {"restart_queue": "pending"}, {"log_permission": "pending"}]'
+                initial_stage: '[{"deployment_id": {{insert_id}} },{"git_pull": "pending"},{"composer_install": "pending"},{"optimize_clear":"pending"}, {"restart_queue": "pending"}, {"log_permission": "pending"}]'
                 ssh_key_path: "{{ (lookup('file', env_file_path) | regex_search('^SSH_KEY_PATH=(.*)$', '$a', multiline=True))[0].strip() | replace('\"', '') }}"
   
             tasks:

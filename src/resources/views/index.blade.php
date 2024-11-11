@@ -28,25 +28,27 @@
 <div class="alert alert-danger" id="danger">
 </div>
 
-<div
-    class="relative flex flex-col w-full h-full overflow-scroll text-gray-700 bg-white shadow-md rounded-lg bg-clip-border pr-3 pl-3 pt-2">
-    <table class="w-full text-left table-auto min-w-max">
-        <thead>
-            <tr>
-                @foreach ($headers as $header)
-                    <th
-                        class="p-4 border-b border-slate-300 bg-slate-50 {{$header == 'Deployment ID' ? '' : 'text-center'}}">
-                        <p class="block text-sm font-normal leading-none text-slate-500">
-                            {{$header}}
-                        </p>
-                    </th>
-                @endforeach
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+<div class="relative flex flex-col w-full h-full overflow-hidden text-gray-700 bg-white shadow-md rounded-lg bg-clip-border">
+    <div class="h-full overflow-y-auto pr-3 pl-3 pt-2">
+        <table class="w-full text-left table-auto min-w-max">
+            <thead class="bg-slate-50">
+                <tr>
+                    @foreach ($headers as $header)
+                        <th class="p-4 border-b border-slate-300 {{$header == 'Deployment ID' ? '' : 'text-center'}} sticky top-0 z-10 bg-slate-50">
+                            <p class="block text-sm font-normal leading-none text-slate-500">
+                                {{$header}}
+                            </p>
+                        </th>
+                    @endforeach
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Populate table rows here -->
+            </tbody>
+        </table>
+    </div>
 </div>
+
 
 <!-- Modal -->
 <div id="myModal"
@@ -66,9 +68,13 @@
 </div>
 
 <script>
-    const createTableRow = (value) => {
+    const createTableRow = (value, i) =>
+    {
         const row = $(`
                 <tr class="hover:bg-slate-50">
+                    <td class="p-2 border-b border-slate-200 py-2">
+                        <p class="block font-semibold text-sm text-slate-800 pl-5">${i}</p>
+                    </td>
                     <td class="p-2 border-b border-slate-200 py-2">
                         <p class="block font-semibold text-sm text-slate-800 pl-5">${value.id}</p>
                     </td>
@@ -121,7 +127,7 @@
     const createNoDeploymentAndLoadingRow = (text) => {
         const row = $(`
                 <tr class="hover:bg-slate-50">
-                    <td class="p-2 border-b border-slate-200 py-2 text-center" colspan="10">
+                    <td class="p-2 border-b border-slate-200 py-2 text-center" colspan="11">
                         <p class="block font-semibold text-xl text-slate-800 pl-5">${text}</p>
                     </td>
                 </tr>
@@ -181,13 +187,13 @@
                     {
                         $('tbody').html("");
                         var clearinterval = true;
-                        response.body.forEach((data) =>
+                        response.body.forEach((data, i) =>
                         {
                             if(data.status != "Completed")
                             {
                                 clearinterval = false;
                             }
-                            $('tbody').append(createTableRow(data));
+                            $('tbody').append(createTableRow(data, i + 1));
                         })
 
                         if(clearinterval)
