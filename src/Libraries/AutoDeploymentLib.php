@@ -183,4 +183,15 @@ class AutoDeploymentLib
 
         return false;
     }
+
+    public static function setMiddleWare()
+    {
+        $middleware = [];
+        if((env("APP_ENV") == 'local' && config('autodeploymentconfig.dev_auth_required')) || (env("APP_ENV") == 'production' && config('autodeploymentconfig.prod_auth_required')))
+        {
+            $middleware = ["auth", "verified"];
+        }
+
+        return $middleware;
+    }
 }

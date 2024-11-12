@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'prod_default_branch' => env('PROD_AUTODEPLOY_DEFAULT_BRANCH', 'masters'),
+    'prod_default_branch' => env('PROD_AUTODEPLOY_DEFAULT_BRANCH', 'master'),
     'prod_sonarqube_branch' => env('PROD_SONARQUBE_SCAN_BRANCH', 'master'),
     'prod_auth_required' => env('PROD_AUTODEPLOY_AUTH', true),
     'dev_default_branch' => env('DEV_AUTODEPLOY_DEFAULT_BRANCH', 'dev'),

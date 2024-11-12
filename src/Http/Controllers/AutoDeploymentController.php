@@ -32,7 +32,7 @@ class AutoDeploymentController extends Controller
         ]);
     }
 
-    public function cicdWebhook(Request $request)
+    public function deploymentWebhook(Request $request)
     {
         try
         {
