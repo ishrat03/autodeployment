@@ -88,14 +88,15 @@ class AutoDeploymentJob implements ShouldQueue
             if($this->branch == "")
             {
                 Log::info("@Deployment Deployment Completed Now");
+                $finalJsonOutput = AutoDeploymentLib::fetchJsonOutput($this->insertId, true);
+                info("@Deployment final", $finalJsonOutput);
             }
             else
             {
                 Log::info("@Deployment Sonar Scam Completed for branch {$this->branch}");
+                $finalJsonOutput = [];
             }
 
-            $finalJsonOutput = AutoDeploymentLib::fetchJsonOutput($this->insertId, true);
-            info("deployment final", $finalJsonOutput);
             AutoDeployment::where("id", $this->insertId)
                 ->update(
                     [
@@ -107,14 +108,21 @@ class AutoDeploymentJob implements ShouldQueue
                     ]
                 );
 
-            $result = [
-                "result" => $finalJsonOutput,
-                "env_pointing" => ucwords(env("APP_ENV")),
-                "branch" => $branch,
-                "deploymentStatus" => $finalJsonOutput["deployment_status"]
-            ];
+            if($this->branch == "")
+            {
+                $result = [
+                    "result" => $finalJsonOutput,
+                    "env_pointing" => ucwords(env("APP_ENV")),
+                    "branch" => $branch,
+                    "deploymentStatus" => $finalJsonOutput["deployment_status"]
+                ];
 
-            AutoDeploymentLib::sendDeploymentEmail($result);
+                info("@Deployment Sending deployment complete email notification");
+                AutoDeploymentLib::sendDeploymentEmail($result);
+                info("@Deployment Email Sent Successfully");
+            }
+
+            info("@Deployment Auto Deployment or Sonar Scan Completed now");
         }
         catch (ProcessFailedException $e)
         {

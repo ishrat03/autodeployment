@@ -255,7 +255,7 @@
                 Swal.fire({
                     title: `${result.value.header.msg}`,
                     icon:result.value.header.status,
-                    timer: 3000,
+                    timer: 6000,
                     timerProgressBar: true,
                 });
                 loadDeployments();
@@ -264,7 +264,7 @@
                 {
                     openModal();
                     viewDeployments(id);
-                }, 3000);
+                }, 6000);
             }
         });
     }
@@ -274,7 +274,7 @@
         interval = setInterval(() =>
         {
             loadDeployments();
-        }, 5000);
+        }, 6000);
     }
 
     function openModal()
@@ -320,7 +320,7 @@
                             deploymentinterval = setInterval(() =>
                             {
                                 viewDeployments(id);
-                            }, 5000);
+                            }, 6000);
                         }
 
                         if(response.body.processing == false && deploymentinterval != "")
