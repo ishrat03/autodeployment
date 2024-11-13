@@ -199,6 +199,7 @@ class AutoDeploymentController extends Controller
             "git_pull",
             "remove_composer_lock",
             "composer_install",
+            "migration",
             "optimize_clear",
             "restart_queue",
             "log_permission",
@@ -230,5 +231,70 @@ class AutoDeploymentController extends Controller
                 ]
             ]
         );
+    }
+
+    public function deploymentEmail($id)
+    {
+        $status = AutoDeployment::select("status", "json_output")
+            ->where("id", $id)
+            ->first();
+
+        if($status == null)
+        {
+            return response(
+                [
+                    "header" => [
+                        "code" => 201,
+                        "status" => "error",
+                        "msg" => "Invalid deployment ID"
+                    ]
+                ]
+            );
+        }
+
+        $processing = false;
+        if($status->status == "processing")
+        {
+            $processing = true;
+            $result = AutoDeploymentLib::fetchJsonOutput($id, false);
+        }
+        else
+        {
+            $result = $status->json_output;
+            $result = json_decode($result, true);
+        }
+
+        // $steps = [
+        //     "deployment_id",
+        //     "git_pull",
+        //     "remove_composer_lock",
+        //     "composer_install",
+        //     "migration",
+        //     "optimize_clear",
+        //     "restart_queue",
+        //     "log_permission",
+        //     "session_permission"
+        // ];
+
+        // $finalResult = [];
+
+        // foreach ($steps as $step)
+        // {
+        //     if(isset($result[$step]))
+        //     {
+        //         $finalResult[$step] = $result[$step];
+        //     }
+        // }
+
+        $result = [
+            "env_pointing" => ucwords(env("APP_ENV")),
+            "branch" => "Testing",
+            "deploymentStatus" => $result["deployment_status"],
+            "result" => $result,
+        ];
+
+        return AutoDeploymentLib::sendDeploymentEmail($result);
+        echo '<pre>';print_r($result);echo '</pre>';exit('exit here');
+        return View("autodeployment::deploymentmail", $result);
     }
 }

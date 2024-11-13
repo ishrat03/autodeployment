@@ -3,8 +3,10 @@ namespace Mohdishrat\Autodeployment\Libraries;
 use Illuminate\Support\Facades\Log;
 use Mohdishrat\Autodeployment\Jobs\AutoDeploymentJob;
 use Mohdishrat\Autodeployment\Libraries\Constants;
+use Mohdishrat\Autodeployment\Mail\DeploymentMail;
 use \Throwable as Exception;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class AutoDeploymentLib
 {
@@ -189,9 +191,46 @@ class AutoDeploymentLib
         $middleware = [];
         if((env("APP_ENV") == 'local' && config('autodeploymentconfig.dev_auth_required')) || (env("APP_ENV") == 'production' && config('autodeploymentconfig.prod_auth_required')))
         {
-            $middleware = ["auth", "verified"];
+            $middleware = ["web", "auth"];
         }
 
         return $middleware;
+    }
+
+    public static function sendDeploymentEmail($data)
+    {
+        $steps = [
+            "deployment_id",
+            "git_pull",
+            "remove_composer_lock",
+            "composer_install",
+            "migration",
+            "optimize_clear",
+            "restart_queue",
+            "log_permission",
+            "session_permission"
+        ];
+
+        $result = $data["result"];
+
+        $finalResult = [];
+
+        foreach ($steps as $step)
+        {
+            if(isset($result[$step]))
+            {
+                $finalResult[$step] = $result[$step];
+            }
+        }
+
+        unset($result);
+
+        $data["result"] = $finalResult;
+        unset($finalResult);
+        $data["subject"] = $data["deploymentStatus"] == "success" ? "Deployment Completed Successfully on ".$data["env_pointing"] : "Deployment Failed on ".$data["env_pointing"];
+
+        // return View('autodeployment::deploymentmail', $data);
+        Mail::to(env("MAIL_TO"))
+            ->send(new DeploymentMail($data));
     }
 }

@@ -36,7 +36,7 @@ class ComposerScripts
             vars:
                 env_file_path: "{{ project_path }}/.env"
                 json_log_file: "{{ project_path }}/public/deployment/deployment_log_{{insert_id}}.json"
-                initial_stage: '[{"deployment_id": {{insert_id}} },{"git_pull": "pending"},{"composer_install": "pending"},{"optimize_clear":"pending"}, {"restart_queue": "pending"}, {"log_permission": "pending"}]'
+                initial_stage: '[{"deployment_id": {{insert_id}} },{"git_pull": "pending"},{"composer_install": "pending"},{"migration": "pending"},{"optimize_clear":"pending"}, {"restart_queue": "pending"}, {"log_permission": "pending"}, {"deployment_status": "failed"}]'
                 ssh_key_path: "{{ (lookup('file', env_file_path) | regex_search('^SSH_KEY_PATH=(.*)$', '$a', multiline=True))[0].strip() | replace('\"', '') }}"
   
             tasks:
@@ -69,13 +69,6 @@ class ComposerScripts
                         GIT_SSH_COMMAND: "ssh -i {{ssh_key_path}} -o StrictHostKeyChecking=no"
                     register: git_pull
                     ignore_errors: yes
-
-                -   name: Git Pull Output
-                    debug:
-                        msg: "{{git_pull.stdout or git_pull.stderr or 'NO OUTPUT'}}"
-                    ignore_errors: yes
-                    when:
-                        - git_pull is succeeded
 
                 -   name: Log Optimize Clear
                     include_tasks: log_task.yml
@@ -112,6 +105,22 @@ class ComposerScripts
                     vars:
                         log_key: 'composer_install'
                         log_value: "{{ composer_install }}"
+
+                -   name: Run Migrations
+                    command: php artisan migrate --force
+                    args:
+                        chdir: "{{project_path}}"
+                    register: migration
+                    ignore_errors: yes
+                    when:
+                        - git_pull is succeeded
+                        - composer_install is succeeded
+
+                -   name: Log Migrations
+                    include_tasks: log_task.yml
+                    vars:
+                        log_key: 'migration'
+                        log_value: "{{migration}}"
 
                 -   name: Optimize Clear
                     command: php artisan optimize:clear
@@ -156,6 +165,7 @@ class ComposerScripts
                         - git_pull is succeeded
                         - composer_install is succeeded
                         - optimize_clear is succeeded
+                        - migration is succeeded
                         - restart_queue is succeeded
 
                 -   name: Log Log Permission
@@ -163,6 +173,36 @@ class ComposerScripts
                     vars:
                         log_key: 'log_permission'
                         log_value: "{{log_permission}}"
+
+                -   name: Set Session Freamework Permission
+                    command: sudo chmod -R 777 storage/framework
+                    args:
+                        chdir: "{{project_path}}"
+                    register: session_permission
+                    ignore_errors: yes
+                    when:
+                        - git_pull is succeeded
+                        - composer_install is succeeded
+                        - optimize_clear is succeeded
+                        - migration is succeeded
+                        - restart_queue is succeeded
+
+                -   name: Log session Permission
+                    include_tasks: log_task.yml
+                    vars:
+                        log_key: 'session_permission'
+                        log_value: "{{session_permission}}"
+
+                -   name: Log Deployment Status
+                    include_tasks: log_task.yml
+                    vars:
+                        log_key: 'deployment_status'
+                        log_value: "success"
+                    when:
+                        - git_pull is succeeded
+                        - composer_install is succeeded
+                        - migration is succeeded
+                        - optimize_clear is succeeded
 
         YML;
 

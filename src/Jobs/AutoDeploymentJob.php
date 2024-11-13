@@ -106,6 +106,15 @@ class AutoDeploymentJob implements ShouldQueue
                         "json_output" => json_encode($finalJsonOutput, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
                     ]
                 );
+
+            $result = [
+                "result" => $finalJsonOutput,
+                "env_pointing" => ucwords(env("APP_ENV")),
+                "branch" => $branch,
+                "deploymentStatus" => $finalJsonOutput["deployment_status"]
+            ];
+
+            AutoDeploymentLib::sendDeploymentEmail($result);
         }
         catch (ProcessFailedException $e)
         {
