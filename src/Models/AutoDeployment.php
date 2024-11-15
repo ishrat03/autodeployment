@@ -4,6 +4,7 @@ namespace Mohdishrat\Autodeployment\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Mohdishrat\Autodeployment\Libraries\AutoDeploymentLib;
 use \Throwable as Exception;
 
 class AutoDeployment extends Model
@@ -31,7 +32,7 @@ class AutoDeployment extends Model
         }
         catch(Exception $e)
         {
-            Log::error("@Deployment AutoDeployment->getAllDeployments catch error", [$e->getMessage(), $e->getLine(), $e->getFile()]);
+            AutoDeploymentLib::createCustomLog("AutoDeployment->getAllDeployments catch error", [$e->getMessage(), $e->getLine(), $e->getFile()], "error");
             return [];
         }
     }
@@ -44,7 +45,7 @@ class AutoDeployment extends Model
         }
         catch(Exception $e)
         {
-            Log::error("@Deployment AutoDeployment->fetchDeploymentById catch error", [$e->getMessage(), $e->getLine(), $e->getFile()]);
+            AutoDeploymentLib::createCustomLog("AutoDeployment->fetchDeploymentById catch error", [$e->getMessage(), $e->getLine(), $e->getFile()], "error");
             return null;
         }
     }

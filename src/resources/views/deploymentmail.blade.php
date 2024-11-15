@@ -24,7 +24,7 @@
             max-width: 800px;
             margin: 0 auto;
             background-color: #ffffff;
-            border: 1px solid #ecf0f1; /* Adding explicit border to container */
+            border: 1px solid #ecf0f1;
             border-radius: 10px;
             overflow: hidden;
         }
@@ -34,19 +34,24 @@
             text-align: center;
         }
         .header {
-            background-color: #17d86e;
             color: #ffffff;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             border-top: 1px solid #ecf0f1;
             border-bottom: 1px solid #ecf0f1;
         }
-        .failed .header {
+        .failed
+        {
             background-color: tomato;
         }
+
+        .success
+        {
+            background-color: #17d86e;
+        }
+
         .footer {
             font-size: 18px;
             padding: 8px;
-            background-color: #17d86e;
             color: #ffffff;
             border-top: 1px solid #ecf0f1; /* Border for footer */
         }

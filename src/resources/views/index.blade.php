@@ -5,24 +5,34 @@
         <h3 class="text-lg font-semibold text-slate-800">All Deployment List</h3>
         <p class="text-slate-500">Overview of the deployments.</p>
     </div>
-    <div class="ml-3">
-        <div class="w-full max-w-sm min-w-[200px] relative">
-            <div class="relative">
-                <input
-                    class="bg-white w-full pr-11 h-10 pl-3 py-2 bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-400 shadow-sm focus:shadow-md"
-                    placeholder="Search for deployments..." />
-                <button class="absolute h-8 w-8 right-1 top-1 my-auto px-2 flex items-center bg-white rounded "
-                    type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
-                        stroke="currentColor" class="w-8 h-8 text-slate-600">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                    </svg>
-                </button>
-            </div>
+    <div class="flex items-center gap-4 ml-3 w-full max-w-sm min-w-[200px]">
+        <div>
+            <a href="/" class="flex items-center gap-1 text-slate-700">
+                <i class="fa-solid fa-house"></i> Home
+            </a>
         </div>
+        <div>
+            <a href="/" class="flex items-center gap-1 text-slate-700" onclick="refreshDeployments(event)">
+                <i class="fa-solid fa-arrows-rotate"></i> Refresh
+            </a>
+        </div>
+        <!-- <div class="relative w-full">
+            <input
+                class="bg-white w-full pr-11 h-10 pl-3 py-2 bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-400 shadow-sm focus:shadow-md"
+                placeholder="Search for deployments..." />
+            <button class="absolute h-8 w-8 right-1 top-1 my-auto px-2 flex items-center bg-white rounded"
+                type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
+                    stroke="currentColor" class="w-8 h-8 text-slate-600">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+            </button>
+        </div> -->
     </div>
 </div>
+
+
 <div class="alert alert-success" id="success">
 </div>
 <div class="alert alert-danger" id="danger">
@@ -54,7 +64,7 @@
 <div id="myModal"
     class="fixed inset-0 z-50 hidden bg-gray-800 bg-opacity-50 pl-5 pr-5 flex items-center justify-center modal-backdrop">
     <div class="bg-white rounded-lg shadow-lg p-5 max-h-[95vh] overflow-y-auto modal">
-        <h2 class="text-lg font-bold mb-4 text-center text-gray-500">Deployment Status</h2>
+        <h2 class="text-2xl font-bold mb-4 text-center text-gray-500">Deployment Status</h2>
         <hr class="w-full border-0 h-[2px] bg-purple-500">
         <div id="resultBox" class="p-2">
         </div>
@@ -169,6 +179,12 @@
             }
         });
     });
+
+    function refreshDeployments(e)
+    {
+        e.preventDefault();
+        loadDeployments();
+    }
 
     function loadDeployments()
     {

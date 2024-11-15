@@ -21,14 +21,14 @@ class AutoDeploymentLib
             {
                 if(($pointing == Constants::PRODPOINTING && $destinationBranch == $prodBranch) || ($pointing == Constants::DEVPOINTING && $destinationBranch == $stageBranch) && $startDeployment)
                 {
-                    info("@Deployment Starting Deployent Process for branch {$result["destination"]["branch"]["name"]}");
+                    AutoDeploymentLib::createCustomLog("Starting Deployent Process for branch {$result["destination"]["branch"]["name"]}");
                     AutoDeploymentJob::dispatch($insertId, "pr_merged", "")->onQueue("cicd");
                 }
             }
         }
         catch(Exception $e)
         {
-            Log::error("@Deployment AutoDeploymentLib->handleMerged catch error", [$e->getMessage(), $e->getLine(), $e->getFile()]);
+            AutoDeploymentLib::createCustomLog("AutoDeploymentLib->handleMerged catch error", [$e->getMessage(), $e->getLine(), $e->getFile()], "error");
             return [];
         }
     }
@@ -46,14 +46,14 @@ class AutoDeploymentLib
                 if(($pointing == Constants::PRODPOINTING && $destinationBranch == $prodBranch) || ($pointing == Constants::DEVPOINTING && $destinationBranch == $stageBranch))
                 {
 
-                    Log::info("@Deployment Starting Sonar Scan Process for branch {$result['source']['branch']['name']}");
+                    AutoDeploymentLib::createCustomLog("Starting Sonar Scan Process for branch {$result['source']['branch']['name']}");
                     AutoDeploymentJob::dispatch($insertId, "sonar_scan", $result['source']['branch']['name'])->onQueue("cicd");
                 }
             }
         }
         catch(Exception $e)
         {
-            Log::error("@Deployment AutoDeploymentLib->handleOpenState catch error", [$e->getMessage(), $e->getLine(), $e->getFile()]);
+            AutoDeploymentLib::createCustomLog("AutoDeploymentLib->handleOpenState catch error", [$e->getMessage(), $e->getLine(), $e->getFile()], "error");
             return [];
         }
     }
@@ -72,14 +72,14 @@ class AutoDeploymentLib
                     self::handleOpenState($result, $pointing, $insertId);
                     break;
                 default:
-                    Log::info("@Deployment No Need to deployment for this webhook");
+                    AutoDeploymentLib::createCustomLog("No Need to deployment for this webhook");
             }
 
             return true;
         }
         catch(Exception $e)
         {
-            Log::error("@Deployment AutoDeploymentLib->handleDeployment catch error", [$e->getMessage(), $e->getLine(), $e->getFile()]);
+            AutoDeploymentLib::createCustomLog("AutoDeploymentLib->handleDeployment catch error", [$e->getMessage(), $e->getLine(), $e->getFile()], "error");
             return false;
         }
     }
@@ -102,7 +102,7 @@ class AutoDeploymentLib
         }
         catch(Exception $e)
         {
-            Log::error("@Deployment AutoDeploymentLib->convertDataToApiData catch error", [$e->getMessage(), $e->getLine(), $e->getFile()]);
+            AutoDeploymentLib::createCustomLog("AutoDeploymentLib->convertDataToApiData catch error", [$e->getMessage(), $e->getLine(), $e->getFile()], "error");
             return [];
         }
     }
@@ -121,7 +121,7 @@ class AutoDeploymentLib
         }
         catch(Exception $e)
         {
-            Log::error("@Deployment AutoDeploymentLib->convertDataToApiData catch error", [$e->getMessage(), $e->getLine(), $e->getFile()]);
+            AutoDeploymentLib::createCustomLog("AutoDeploymentLib->convertDataToApiData catch error", [$e->getMessage(), $e->getLine(), $e->getFile()], "error");
             return false;
         }
     }
@@ -232,5 +232,49 @@ class AutoDeploymentLib
         // return View('autodeployment::deploymentmail', $data);
         Mail::to(env("MAIL_TO"))
             ->send(new DeploymentMail($data));
+    }
+
+    public static function createCustomLog($string, $msg = "", $type = "success")
+    {
+        $name = "auto_deployment/auto_deployment_".date(Constants::CURRENTDATE).".log";
+        $channel = Log::build([
+            'driver' => 'single',
+            'path' => storage_path("logs/auto_deployment/{$name}"),
+            'permission' => 0666,
+            "days" => 4
+        ]);
+
+        if($type == "success")
+        {
+            if(is_array($msg))
+            {
+                Log::stack([$channel])->info($string, $msg);
+            }
+            elseif($msg == "")
+            {
+                Log::stack([$channel])->info($string);
+            }
+            else
+            {
+                Log::stack([$channel])->info($string, [$msg]);
+            }
+        }
+        elseif ($type == "error")
+        {
+            if(is_array($msg))
+            {
+                Log::stack([$channel])->error($string, $msg);
+            }
+            elseif($msg == "")
+            {
+                Log::stack([$channel])->error($string);
+            }
+            else
+            {
+                Log::stack([$channel])->error($string, [$msg]);
+            }
+        }
+
+        return $channel;
     }
 }

@@ -36,7 +36,7 @@ class AutoDeploymentJob implements ShouldQueue
     public function handle(): void
     {
         ini_set("max_execution_time", 6000);
-        Log::info("@Deployment Started Deployment or sonar scan Now");
+        AutoDeploymentLib::createCustomLog("Started Deployment or sonar scan Now");
         AutoDeployment::where("id", $this->insertId)
             ->update(
                 [
@@ -74,7 +74,7 @@ class AutoDeploymentJob implements ShouldQueue
 
         $params = "-e project_path='{$envVars['HOME']}' -e branch='{$branch}' -e env_pointing='{$envPointing}' -e insert_id='{$this->insertId}'";
 
-        Log::info("@Deployment sending calls for playbook", [$playbookPath, $params]);
+        AutoDeploymentLib::createCustomLog("Sending calls for playbook", [$playbookPath, $params]);
         $process = new Process(['ansible-playbook', $playbookPath, $params]);
         
         // Set environment variables for the process
@@ -83,17 +83,17 @@ class AutoDeploymentJob implements ShouldQueue
         try
         {
             $process->mustRun();
-            Log::info('@Deployment Ansible playbook executed successfully.', [$process->getOutput()]);
+            AutoDeploymentLib::createCustomLog('Ansible playbook executed successfully.', [$process->getOutput()]);
 
             if($this->branch == "")
             {
-                Log::info("@Deployment Deployment Completed Now");
+                AutoDeploymentLib::createCustomLog("@Deployment Deployment Completed Now");
                 $finalJsonOutput = AutoDeploymentLib::fetchJsonOutput($this->insertId, true);
                 info("@Deployment final", $finalJsonOutput);
             }
             else
             {
-                Log::info("@Deployment Sonar Scam Completed for branch {$this->branch}");
+                AutoDeploymentLib::createCustomLog("@Deployment Sonar Scam Completed for branch {$this->branch}");
                 $finalJsonOutput = [];
             }
 
@@ -117,17 +117,17 @@ class AutoDeploymentJob implements ShouldQueue
                     "deploymentStatus" => $finalJsonOutput["deployment_status"]
                 ];
 
-                info("@Deployment Sending deployment complete email notification");
+                AutoDeploymentLib::createCustomLog("Sending deployment complete email notification");
                 AutoDeploymentLib::sendDeploymentEmail($result);
-                info("@Deployment Email Sent Successfully");
+                AutoDeploymentLib::createCustomLog("Email Sent Successfully");
             }
 
-            info("@Deployment Auto Deployment or Sonar Scan Completed now");
+            AutoDeploymentLib::createCustomLog("Auto Deployment or Sonar Scan Completed now");
         }
         catch (ProcessFailedException $e)
         {
-            Log::error('@Deployment Ansible playbook execution failed: ' . $e->getMessage());
-            Log::error("@Deployment Deployment or sonar scan Failed.");
+            AutoDeploymentLib::createCustomLog('Ansible playbook execution failed: ' . $e->getMessage(), "", "error");
+            AutoDeploymentLib::createCustomLog("@Deployment Deployment or sonar scan Failed.", "", "error");
         }
     }
 }

@@ -40,24 +40,43 @@ class AutoDeploymentController extends Controller
 
             if(isset($result["pullrequest"]))
             {
-                $obj = new AutoDeployment();
+                $deploymentBranch = config("autodeploymentconfig.prod_default_branch");
+                if(env("APP_ENV") == "local")
+                {
+                    $deploymentBranch = config("autodeploymentconfig.dev_default_branch");
+                }
 
-                $obj->webhook_payload = json_encode($result);
-                $obj->created_at = date(Constants::CURRENTDATETIME);
-                $obj->updated_at = date(Constants::CURRENTDATETIME);
-                $obj->webhook_time = date(Constants::CURRENTDATETIME);
-                $obj->name = "pr_merged";
-                $obj->status = "pending";
-                $obj->process_output = "";
-                $obj->save();
-                $insertId = $obj->id;
-                unset($obj);
-                $result = $result["pullrequest"];
-                AutoDeploymentLib::handleDeployment($result, $insertId, AutoDeploymentLib::checkForStartDeployment());
+                if($result["pullrequest"]["destination"]["branch"]["name"] == $deploymentBranch)
+                {
+                    $name = "sonar_scan";
+
+                    if($result["pullrequest"]["state"] == "MERGED")
+                    {
+                        $name = "pr_merged";
+                    }
+                    $obj = new AutoDeployment();
+                    $obj->webhook_payload = json_encode($result);
+                    $obj->created_at = date(Constants::CURRENTDATETIME);
+                    $obj->updated_at = date(Constants::CURRENTDATETIME);
+                    $obj->webhook_time = date(Constants::CURRENTDATETIME);
+                    $obj->name = $name;
+                    $obj->status = "pending";
+                    $obj->process_output = "";
+                    $obj->save();
+                    $insertId = $obj->id;
+                    unset($obj);
+                    $result = $result["pullrequest"];
+                    AutoDeploymentLib::createCustomLog("Deployment Added for branch", $deploymentBranch);
+                    AutoDeploymentLib::handleDeployment($result, $insertId, AutoDeploymentLib::checkForStartDeployment());
+                }
+                else
+                {
+                    AutoDeploymentLib::createCustomLog("No Deployment Needed for this webhook");
+                }
             }
             else
             {
-                Log::info("@Deployment No Deployment Needed for this webhook");
+                AutoDeploymentLib::createCustomLog("No Deployment Needed for this webhook");
             }
 
             return response(
@@ -72,7 +91,7 @@ class AutoDeploymentController extends Controller
         }
         catch(Exception $e)
         {
-            Log::error("@Deployment AutoDeploymentController->cicdWebhook catch error", [$e->getMessage(), $e->getLine(), $e->getFile()]);
+            AutoDeploymentLib::createCustomLog("AutoDeploymentController->cicdWebhook catch error", [$e->getMessage(), $e->getLine(), $e->getFile()], "error");
             return response(
                 [
                     "header" => [
@@ -142,7 +161,7 @@ class AutoDeploymentController extends Controller
         }
         catch(Exception $e)
         {
-            Log::error("@Deployment AutoDeploymentController->retryDeployment catch error", [$e->getMessage(), $e->getLine(), $e->getFile()]);
+            AutoDeploymentLib::createCustomLog("AutoDeploymentController->retryDeployment catch error", [$e->getMessage(), $e->getLine(), $e->getFile()], "error");
             return redirect()->back()->with("error", "Facing some Techinal Carrier");
         }
     }

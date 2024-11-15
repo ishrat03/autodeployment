@@ -6,9 +6,12 @@
             <p class="text-gray-500 text-sm width:100%">
                 @if(is_array($value))
                     @if((isset($value["skipped"]) && $value["skipped"] == false) || isset($value['failed']))
-                        <pre class="content-pre">{{$value["stderr"]}}</pre>
-                        <pre class="content-pre">{{$value["stdout"]}}</pre>
-                    @else
+                        @if($value["stdout"] != "")
+                            <pre class="content-pre">@if($value["stderr"] != ""){{$value["stderr"]}}<br><br>@endif{{$value["stdout"]}}</pre>
+                        @else
+                            <pre class="content-pre">No Output</pre>
+                        @endif
+                        @else
                         <pre class="content-pre">This step is Skipped</pre>
                         <pre class="content-pre"><b>Reason:</b></pre>
                         <ul class="list-disc px-8" style="font-family:monospace;">
