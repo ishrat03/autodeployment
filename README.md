@@ -40,7 +40,7 @@ composer require mohdishrat/autodeployment
         dv = default value
         PRODUCTION .env variables
             PROD_AUTODEPLOY_DEFAULT_BRANCH  // [dv = master] Default branch name for deployment.[take pull for this branch]
-            PROD_DEPLOYMENT_PASSWORD   // Password to start deployment (password should be hashed with laravel Hash::mak())
+            PROD_DEPLOYMENT_PASSWORD  // Password to start deployment (password should be hashed with laravel Hash::make())
             PROD_AUTO_DEPLOY  // [dv = false] [true, false] true if set for start deployment when PR merge and false when need human interaction for deployment.
             SSH_KEY_PATH    // full path of ssh_key which will be used to pull the key. Please make sure ssh_key don't have passphrase.
             PROD_AUTODEPLOY_AUTH  // [dv = true][true, false] true when need authentication to open deployment page and false for no authentication required for deployment pages.
@@ -76,7 +76,7 @@ composer require mohdishrat/autodeployment
             MAIL_FROM_NAME
             MAIL_TO
 
-### Step 5: Run Artisan command and Compoder Autload
+### Step 5: Run Artisan command and Composer Autoload
     run command
         composer dump-autoload
         php artisan optimize:clear
