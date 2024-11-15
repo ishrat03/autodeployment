@@ -24,6 +24,10 @@ class AutoDeploymentLib
                     AutoDeploymentLib::createCustomLog("Starting Deployent Process for branch {$result["destination"]["branch"]["name"]}");
                     AutoDeploymentJob::dispatch($insertId, "pr_merged", "")->onQueue("cicd");
                 }
+                else
+                {
+                    AutoDeploymentLib::createCustomLog("No Need to start Deployment",[$result["destination"]["branch"]["name"], $pointing]);
+                }
             }
         }
         catch(Exception $e)
@@ -239,7 +243,7 @@ class AutoDeploymentLib
         $name = "auto_deployment/auto_deployment_".date(Constants::CURRENTDATE).".log";
         $channel = Log::build([
             'driver' => 'single',
-            'path' => storage_path("logs/auto_deployment/{$name}"),
+            'path' => storage_path("logs/{$name}"),
             'permission' => 0666,
             "days" => 4
         ]);
