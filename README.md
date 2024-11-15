@@ -22,7 +22,15 @@ This Laravel package `mohdishrat/autodeployment` provides a simplified solution 
 ### Step 1: Install via Composer
 ```bash
 composer require mohdishrat/autodeployment
+```
 
 ### Step 2: Update Provider
     Open bootstrap/providers.php
         add  Mohdishrat\Autodeployment\Providers\AutoDeploymentProvider::class in bootstrap/providers.php
+    If bootstrap/provider.php is not present in project then
+        add Mohdishrat\Autodeployment\Providers\AutoDeploymentProvider::class in config/app.php under providers key
+
+### Step 3: Update Composer.json
+    Open project composer.json
+    add "Mohdishrat\\Autodeployment\\ComposerScripts::createPlaybooksDirectory" under scripts.post-autoload-dump key
+        It will create necessary playbooks to start deployment
