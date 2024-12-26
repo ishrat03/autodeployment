@@ -316,4 +316,30 @@ class AutoDeploymentController extends Controller
         echo '<pre>';print_r($result);echo '</pre>';exit('exit here');
         return View("autodeployment::deploymentmail", $result);
     }
+
+    public function deleteDeployments($id)
+    {
+        if(AutoDeployment::where("id", $id)->delete())
+        {
+            return response(
+                [
+                    "header" => [
+                        "code" => 200,
+                        "status" => "success",
+                        "msg" => "Deployment Deleted Successfully"
+                    ]
+                ]
+            );
+        }
+
+        return response(
+            [
+                "header" => [
+                    "code" => 200,
+                    "status" => "success",
+                    "msg" => "Unable to delete deployment"
+                ]
+            ]
+        );
+    }
 }

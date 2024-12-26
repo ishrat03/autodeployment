@@ -14,6 +14,7 @@ Route::middleware($middleware)->group(function()
         Route::get("deploymentdata", 'deploymentData');
         Route::get("deploymentstatus/{id}", "deploymentStatus");
         Route::get("deploymentemail/{id}", "deploymentEmail");
+        Route::get("deletedeployments/{id}", "deleteDeployments");
     });
 });
 

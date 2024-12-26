@@ -38,15 +38,15 @@
 <div class="alert alert-danger" id="danger">
 </div>
 
-<div class="relative flex flex-col w-full h-full overflow-hidden text-gray-700 bg-white shadow-md rounded-lg bg-clip-border">
-    <div class="h-full overflow-y-auto pr-3 pl-3 pt-2">
+<div class="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md rounded-lg bg-clip-border">
+    <div class="h-[85vh] overflow-y-auto px-3 pt-2">
         <table class="w-full text-left table-auto min-w-max">
             <thead class="bg-slate-50">
                 <tr>
                     @foreach ($headers as $header)
-                        <th class="p-4 border-b border-slate-300 {{$header == 'Deployment ID' ? '' : 'text-center'}} sticky top-0 z-10 bg-slate-50">
+                        <th class="p-4 border-b border-slate-300 {{ $header == 'Deployment ID' ? '' : 'text-center' }} sticky top-0 z-10 bg-slate-50">
                             <p class="block text-sm font-normal leading-none text-slate-500">
-                                {{$header}}
+                                {{ $header }}
                             </p>
                         </th>
                     @endforeach
@@ -124,9 +124,8 @@
                             }
 
                             <button onclick="openModalAndViewDeployments(${value.id})" class="px-4 py-1 bg-gray-500 text-white font-semibold hover:bg-gray-600 focus:outline-none hover:scale-105"><i class="fa-solid fa-eye"></i></button>
-                            <a href="/" class="px-4 py-1 bg-red-500 text-white font-semibold rounded-r-lg hover:bg-red-700 focus:outline-none hover:scale-105">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </a>`}
+                            <button onclick="deleteDeployments(event, ${value.id})" class="px-4 py-1 bg-red-500 text-white font-semibold rounded-r-lg hover:bg-red-700 focus:outline-none hover:scale-105"><i class="fa-solid fa-trash-can"></i></button>`
+                            }
                         </div>
                     </td>
                 </tr>
@@ -238,7 +237,7 @@
         Swal.fire(
         {
             title: "Deployment Password",
-            input: "text",
+            input: "password",
             inputAttributes: {
                 autocapitalize: "off"
             },
@@ -263,7 +262,7 @@
                 }
             },
             allowOutsideClick: () => !Swal.isLoading()
-            }
+        }
         ).then((result) =>
         {
             if (result.isConfirmed)
@@ -359,6 +358,71 @@
                 $("#danger").html("Something went wrong");
             }
         });
+    }
+
+    function deleteDeployments(e, id)
+    {
+        e.preventDefault();
+        const swalWithBootstrapButtons = Swal.mixin(
+        {
+            customClass:
+            {
+                confirmButton: "btn btn-success",
+                cancelButton: "btn btn-danger"
+            },
+            buttonsStyling: false
+        });
+
+        swalWithBootstrapButtons.fire(
+        {
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "No, cancel!",
+            reverseButtons: true
+        }).then((result) =>
+        {
+            if (result.isConfirmed)
+            {
+                // Show loading spinner
+                swalWithBootstrapButtons.fire(
+                {
+                    title: "Deleting...",
+                    text: "Please wait while we process your request.",
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () =>
+                    {
+                        Swal.showLoading(); // Show loader
+                    }
+                });
+
+                $.ajax({
+                url: `/deletedeployments/${id}`,
+                type: "GET",
+                success: function(response)
+                {
+                    swalWithBootstrapButtons.fire(
+                    {
+                        title: "Deleted!",
+                        text: "Deployment has been deleted",
+                        icon: "success"
+                    });
+                    loadDeployments();
+                },
+                error: function(error)
+                {
+                    swalWithBootstrapButtons.fire(
+                    {
+                        title: "Error",
+                        text: "There was an issue deleting deployment. Please try again.",
+                        icon: "error"
+                    });
+                }
+            });
+        }});
     }
 </script>
 @endsection

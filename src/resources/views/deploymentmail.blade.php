@@ -128,8 +128,8 @@
                                 <pre style="background-color: #061414cc; padding: 15px; border-radius: 5px; font-size: 14px; line-height: 1.5; color: white; white-space: pre-wrap; border: 1px solid #ddd;">No Output</pre>
                             @endif
                         @else
-                            <pre style="background-color: #ecf0f1; padding: 15px; border-radius: 5px; font-size: 14px; line-height: 1.5; color: #2c3e50; white-space: pre-wrap; border: 1px solid #ddd;">This step is Skipped</pre>
-                            <pre style="background-color: #ecf0f1; padding: 15px; border-radius: 5px; font-size: 14px; line-height: 1.5; color: #2c3e50; white-space: pre-wrap; border: 1px solid #ddd;"><b>Reason:</b></pre>
+                            <pre style="background-color: #061414cc; padding: 15px; border-radius: 5px; font-size: 14px; line-height: 1.5; color: white; white-space: pre-wrap; border: 1px solid #ddd;">This step is Skipped</pre>
+                            <pre style="background-color: #061414cc; padding: 15px; border-radius: 5px; font-size: 14px; line-height: 1.5; color: white; white-space: pre-wrap; border: 1px solid #ddd;"><b>Reason:</b></pre>
                             <ul style="font-family:monospace;">
                                 <li>{{$value['skip_reason']}}</li>
                                 <li>{{$value['false_condition']}}</li>

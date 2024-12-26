@@ -240,7 +240,7 @@ class AutoDeploymentLib
 
     public static function createCustomLog($string, $msg = "", $type = "success")
     {
-        $name = "auto_deployment/auto_deployment_".date(Constants::CURRENTDATE).".log";
+        $name = "auto_deployment/auto_deployment-".date(Constants::CURRENTDATE).".log";
         $channel = Log::build([
             'driver' => 'single',
             'path' => storage_path("logs/{$name}"),
